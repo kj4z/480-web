@@ -1,0 +1,142 @@
+
+<html><head>
+<script>
+
+var freq = 0;
+var tx_vfo = 0;
+var base_url = "http://my.web.server:7388";
+
+function ready() {
+	document.getElementById("scrollDiv").addEventListener("mousewheel", MouseWheelHandler, false);
+}
+
+function freqListener () {
+	vfos = this.responseText.split(';');
+	freq = parseInt(vfos[1]);
+	document.getElementById("freqDiv").innerHTML = numberWithSpaces(parseInt(vfos[0]));
+	document.getElementById("scrollDiv").innerHTML = numberWithSpaces(freq);
+}
+
+function toggleListener () {
+	if (this.responseText == 'TXA') {
+		tx_vfo = 0;
+		document.getElementById("vfoInfo").innerHTML = "<font color='red'>VFO A = TX<br />VFO B = RX</font>";
+	} else {
+		tx_vfo = 1;
+		document.getElementById("vfoInfo").innerHTML = "<font color='green'>VFO A = RX<br />VFO B = TX</font>";
+	}
+}
+
+function MouseWheelHandler(evt) {
+	//console.log(evt.deltaY);
+	freq += evt.deltaY;
+	freq = parseInt(freq);
+	document.getElementById("scrollDiv").innerHTML = numberWithSpaces(freq);
+
+	paddedFreq = pad(freq,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?f=" + paddedFreq);
+	fReq.send();
+
+}
+
+function pad(num, size) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
+
+function numberWithSpaces(x) {
+	// could also use str.toLocaleString() if I wanted commas
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function sendCall() {
+	if (tx_vfo == 0) {
+		alert('Check your VFO, dumbass!');
+		return;
+	}
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/k?s=" + document.getElementById('call').value);
+	rReq.send();
+}
+
+function sendReport() {
+	if (tx_vfo == 0) {
+		alert('Check your VFO, dumbass!');
+		return;
+	}
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/k?s=" + document.getElementById('report').value);
+	rReq.send();
+}
+
+function toggleVFO() {
+	var rReq = new XMLHttpRequest();
+	rReq.addEventListener("load", toggleListener);
+	rReq.open("GET", base_url + "/v");
+	rReq.send();
+}
+
+document.onkeyup = function(e) {
+	if (document.activeElement == document.getElementById('call')) {
+		return; //don't capture key presses when we're editing the text fields
+	}
+	if (document.activeElement == document.getElementById('report')) {
+		return; // ditto
+	}
+	if(e.keyCode == 32) {
+		toggleVFO();
+	} else if (e.keyCode == 67) {
+		sendCall();
+	} else if (e.keyCode == 82) {
+		sendReport();
+	}
+}
+
+var oReq = new XMLHttpRequest();
+oReq.addEventListener("load", freqListener);
+oReq.open("GET", base_url + "/f");
+oReq.send();
+
+</script>
+</head>
+
+<body onload="ready()">
+
+<table border="0">
+	<tr>
+		<td>
+			VFO A:
+		</td>
+		<td>
+			<div id="freqDiv"></div>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			VFO B:
+		</td>
+		<td>
+			<div id="scrollDiv"></div>
+		</td>
+	</tr>
+</table>
+<br />
+<div id="vfoInfo"></div>
+<br />
+
+<table border="1">
+<tr>
+	<td>Call</td><td><input type="text" name="call" id="call" value="KJ4Z"></td><td><input type="button" value="Send" onClick="javascript:sendCall()"></td>
+</tr>
+<tr>
+	<td>Report</td><td><input type="text" name="report" id="report" value="5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
+</tr>
+
+</table>
+<br />
+<input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()">
+
+</body>
+</html>
