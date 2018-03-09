@@ -104,6 +104,20 @@ class ToggleHandler(tornado.web.RequestHandler):
 		ser.write('FW2000;') # set filter bandwidth to 2 kHz
 		vfo = 0
 
+class ToggleVox(tornado.web.RequestHandler):
+    def get(self):
+        global ser
+        vox = ''
+        ser.write('VX;')
+        vox = ser.read(4)
+        voxstat = vox[2]
+        if (voxstat == '1'):
+            vox='0'
+        else:
+            vox='1'
+	cmd = 'VX' + vox +';'
+        ser.write(cmd)
+
 def make_app():
     return tornado.web.Application([
         (r"/u", UpHandler),
@@ -113,6 +127,7 @@ def make_app():
 	(r"/s", SetFreqHandler),
 	(r"/c", SetCWSpeedHandler),
 	(r"/k", SendCWHandler),
+	(r"/x", ToggleVox),
     ])
 
 if __name__ == "__main__":

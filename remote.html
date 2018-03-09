@@ -78,6 +78,12 @@ function toggleVFO() {
 	rReq.send();
 }
 
+function toggleVox() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/x");
+	rReq.send();
+}
+
 document.onkeyup = function(e) {
 	if (document.activeElement == document.getElementById('call')) {
 		return; //don't capture key presses when we're editing the text fields
@@ -137,6 +143,9 @@ oReq.send();
 </table>
 <br />
 <input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()">
+<br />
+<br />
+<input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
 
 </body>
 </html>
