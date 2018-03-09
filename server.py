@@ -115,7 +115,7 @@ class ToggleVox(tornado.web.RequestHandler):
             vox='0'
         else:
             vox='1'
-	cmd = 'VX' + vox +';'
+        cmd = 'VX' + vox +';'
         ser.write(cmd)
 
 def make_app():
