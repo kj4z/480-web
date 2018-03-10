@@ -48,11 +48,15 @@ class SetFreqHandler(tornado.web.RequestHandler):
 class SetCWSpeedHandler(tornado.web.RequestHandler):
     def get(self):
 	global ser
-	cmd = 'KS' + self.get_query_argument('s').zfill(3) +';'
-	cmd = str(cmd)
+        speed = self.get_query_argument('s').zfill(3)
+        if speed == 'TBD':
+            speed = ''
+	cmd = str('KS' + speed + ';')
 	self.set_header('Access-Control-Allow-Origin', '*')
-        self.write("SPD " + cmd)
 	ser.write(cmd)
+        if speed == '':
+            speed = ser.read(6)[3:5]
+        self.write("SPD " + speed)
 	print cmd
 
 class SendCWHandler(tornado.web.RequestHandler):
@@ -108,6 +112,7 @@ class ToggleHandler(tornado.web.RequestHandler):
 class ToggleVox(tornado.web.RequestHandler):
     def get(self):
         global ser
+	self.set_header('Access-Control-Allow-Origin', '*')
         vox = ''
         ser.write('VX;')
         vox = ser.read(4)

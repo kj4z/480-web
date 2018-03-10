@@ -61,6 +61,18 @@ function numberWithSpaces(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 
+function CWSpeed() {
+        cwSpeedString = document.getElementById('speed').value
+        cwspeed = parseInt(cwSpeedString);
+	if (cwspeed > 60) {
+		alert('The speed limit is 60, Hot Rod!');
+		return;
+	}
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/c?s=" + cwspeed);
+	rReq.send();
+}
+
 function sendCall() {
 	if (tx_vfo == 0) {
 		alert('Check your VFO, dumbass!');
@@ -156,7 +168,21 @@ oReq.send();
 <tr>
 	<td>Report</td><td><input type="text" name="report" id="report" value="5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
 </tr>
-
+<tr><td>
+<div id="swrColor"></div>
+</td>
+<td>
+<div id="swrInfo"></div>
+</td>
+<td>
+<input type="button" value="Tune" onClick="javascript:tune()">
+</td>
+<tr>
+<td>CW Speed</td>
+<td><input type="text" name="speed" id="speed" value="TBD"></td>
+<td><input type="button" value="Set" onClick="javascript:CWSpeed()"></td>
+</tr>
+</tr>
 </table>
 <br />
 <input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()">
@@ -165,17 +191,8 @@ oReq.send();
 <input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
 <br />
 <br />
-<input type="button" value="Tune" onClick="javascript:tune()">
 <br />
 <br />
-<table border="1">
-<tr><td>
-<div id="swrColor"></div>
-</td>
-<td>
-<div id="swrInfo"></div>
-</td></tr>
-</table>
 
 </body>
 </html>
