@@ -106,6 +106,12 @@ function toggleVox() {
 	rReq.send();
 }
 
+function toggleCWR() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/r");
+	rReq.send();
+}
+
 function tune() {
 	var tReq = new XMLHttpRequest();
 	tReq.addEventListener("load", tuneListener);
@@ -191,6 +197,7 @@ oReq.send();
 <input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
 <br />
 <br />
+<input type="button" value="Toggle CWR" onClick="javascript:toggleCWR()">
 <br />
 <br />
 

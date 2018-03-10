@@ -109,6 +109,17 @@ class ToggleHandler(tornado.web.RequestHandler):
 		ser.write('FW2000;') # set filter bandwidth to 2 kHz
 		vfo = 0
 
+class ToggleCWR(tornado.web.RequestHandler):
+    def get(self):
+        global ser
+	self.set_header('Access-Control-Allow-Origin', '*')
+        ser.write('MD;')
+        mode = ser.read(4)[-2]
+        if mode == '7':
+            ser.write('MD3;')
+        if mode == '3':
+            ser.write('MD7;')
+
 class ToggleVox(tornado.web.RequestHandler):
     def get(self):
         global ser
@@ -163,6 +174,7 @@ def make_app():
 	(r"/k", SendCWHandler),
 	(r"/x", ToggleVox),
 	(r"/t", Tune),
+	(r"/r", ToggleCWR),
     ])
 
 if __name__ == "__main__":
