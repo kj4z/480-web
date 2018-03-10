@@ -27,6 +27,16 @@ function toggleListener () {
 	}
 }
 
+function tuneListener () {
+        swr = this.responseText
+        if (swr[0] == '1') {
+            document.getElementById("swrColor").innerHTML = "<font color='green'>SWR</font>";
+        } else {
+            document.getElementById("swrColor").innerHTML = "<font color='red'>SWR</font>";
+        }
+        document.getElementById("swrInfo").innerHTML = swr + ':1';
+}
+
 function MouseWheelHandler(evt) {
 	//console.log(evt.deltaY);
 	freq += evt.deltaY;
@@ -82,6 +92,13 @@ function toggleVox() {
 	var rReq = new XMLHttpRequest();
 	rReq.open("GET", base_url + "/x");
 	rReq.send();
+}
+
+function tune() {
+	var tReq = new XMLHttpRequest();
+	tReq.addEventListener("load", tuneListener);
+	tReq.open("GET", base_url + "/t");
+	tReq.send();
 }
 
 document.onkeyup = function(e) {
@@ -146,6 +163,19 @@ oReq.send();
 <br />
 <br />
 <input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
+<br />
+<br />
+<input type="button" value="Tune" onClick="javascript:tune()">
+<br />
+<br />
+<table border="1">
+<tr><td>
+<div id="swrColor"></div>
+</td>
+<td>
+<div id="swrInfo"></div>
+</td></tr>
+</table>
 
 </body>
 </html>

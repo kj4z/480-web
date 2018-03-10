@@ -17,6 +17,7 @@ vfo = 0
 # configure the serial connections (the parameters differs on the device you are connecting to)
 ser = serial.Serial(
     port='COM2',
+    #port='/dev/ttyUSB0',
     baudrate=9600
 )
 
@@ -118,6 +119,34 @@ class ToggleVox(tornado.web.RequestHandler):
         cmd = 'VX' + vox +';'
         ser.write(cmd)
 
+class Tune(tornado.web.RequestHandler):
+    def get(self):
+        global ser
+        meter = ''
+        ser.write('TX2;')
+        ser.write('RM;')
+        time.sleep(2)
+        meter = ser.read(24)
+        ser.write('RX;')
+        dec = int(meter.split(';')[0][-2:])
+        if (dec <= 1):
+            swr = '1.1'
+        if (dec == 2):
+            swr = '1.3'
+        if (dec == 3):
+            swr = '1.6'
+        if (dec == 4):
+            swr = '1.9'
+        if (dec == 5):
+            swr = '2.3'
+        if (dec == 6):
+            swr = '3'
+        if (dec > 6):
+            swr = '>3'
+	self.set_header('Access-Control-Allow-Origin', '*')
+        self.write(swr)
+
+
 def make_app():
     return tornado.web.Application([
         (r"/u", UpHandler),
@@ -128,6 +157,7 @@ def make_app():
 	(r"/c", SetCWSpeedHandler),
 	(r"/k", SendCWHandler),
 	(r"/x", ToggleVox),
+	(r"/t", Tune),
     ])
 
 if __name__ == "__main__":
