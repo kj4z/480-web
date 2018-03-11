@@ -17,6 +17,7 @@ vfo = 0
 # configure the serial connections (the parameters differs on the device you are connecting to)
 ser = serial.Serial(
     port='COM2',
+    #port='/dev/ttyUSB0',
     baudrate=9600
 )
 
@@ -47,11 +48,15 @@ class SetFreqHandler(tornado.web.RequestHandler):
 class SetCWSpeedHandler(tornado.web.RequestHandler):
     def get(self):
 	global ser
-	cmd = 'KS' + self.get_query_argument('s').zfill(3) +';'
-	cmd = str(cmd)
+        speed = self.get_query_argument('s').zfill(3)
+        if speed == 'TBD':
+            speed = ''
+	cmd = str('KS' + speed + ';')
 	self.set_header('Access-Control-Allow-Origin', '*')
-        self.write("SPD " + cmd)
 	ser.write(cmd)
+        if speed == '':
+            speed = ser.read(6)[3:5]
+        self.write("SPD " + speed)
 	print cmd
 
 class SendCWHandler(tornado.web.RequestHandler):
@@ -104,6 +109,60 @@ class ToggleHandler(tornado.web.RequestHandler):
 		ser.write('FW2000;') # set filter bandwidth to 2 kHz
 		vfo = 0
 
+class ToggleCWR(tornado.web.RequestHandler):
+    def get(self):
+        global ser
+	self.set_header('Access-Control-Allow-Origin', '*')
+        ser.write('MD;')
+        mode = ser.read(4)[-2]
+        if mode == '7':
+            ser.write('MD3;')
+        if mode == '3':
+            ser.write('MD7;')
+
+class ToggleVox(tornado.web.RequestHandler):
+    def get(self):
+        global ser
+	self.set_header('Access-Control-Allow-Origin', '*')
+        vox = ''
+        ser.write('VX;')
+        vox = ser.read(4)
+        voxstat = vox[2]
+        if (voxstat == '1'):
+            vox='0'
+        else:
+            vox='1'
+        cmd = 'VX' + vox +';'
+        ser.write(cmd)
+
+class Tune(tornado.web.RequestHandler):
+    def get(self):
+        global ser
+        meter = ''
+        ser.write('TX2;')
+        ser.write('RM;')
+        time.sleep(2)
+        meter = ser.read(24)
+        ser.write('RX;')
+        dec = int(meter.split(';')[0][-2:])
+        if (dec <= 1):
+            swr = '1.1'
+        if (dec == 2):
+            swr = '1.3'
+        if (dec == 3):
+            swr = '1.6'
+        if (dec == 4):
+            swr = '1.9'
+        if (dec == 5):
+            swr = '2.3'
+        if (dec == 6):
+            swr = '3'
+        if (dec > 6):
+            swr = '>3'
+	self.set_header('Access-Control-Allow-Origin', '*')
+        self.write(swr)
+
+
 def make_app():
     return tornado.web.Application([
         (r"/u", UpHandler),
@@ -113,6 +172,9 @@ def make_app():
 	(r"/s", SetFreqHandler),
 	(r"/c", SetCWSpeedHandler),
 	(r"/k", SendCWHandler),
+	(r"/x", ToggleVox),
+	(r"/t", Tune),
+	(r"/r", ToggleCWR),
     ])
 
 if __name__ == "__main__":

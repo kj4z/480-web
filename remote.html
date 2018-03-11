@@ -27,6 +27,16 @@ function toggleListener () {
 	}
 }
 
+function tuneListener () {
+        swr = this.responseText
+        if (swr[0] == '1') {
+            document.getElementById("swrColor").innerHTML = "<font color='green'>SWR</font>";
+        } else {
+            document.getElementById("swrColor").innerHTML = "<font color='red'>SWR</font>";
+        }
+        document.getElementById("swrInfo").innerHTML = swr + ':1';
+}
+
 function MouseWheelHandler(evt) {
 	//console.log(evt.deltaY);
 	freq += evt.deltaY;
@@ -49,6 +59,18 @@ function pad(num, size) {
 function numberWithSpaces(x) {
 	// could also use str.toLocaleString() if I wanted commas
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+function CWSpeed() {
+        cwSpeedString = document.getElementById('speed').value
+        cwspeed = parseInt(cwSpeedString);
+	if (cwspeed > 60) {
+		alert('The speed limit is 60, Hot Rod!');
+		return;
+	}
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/c?s=" + cwspeed);
+	rReq.send();
 }
 
 function sendCall() {
@@ -76,6 +98,25 @@ function toggleVFO() {
 	rReq.addEventListener("load", toggleListener);
 	rReq.open("GET", base_url + "/v");
 	rReq.send();
+}
+
+function toggleVox() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/x");
+	rReq.send();
+}
+
+function toggleCWR() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/r");
+	rReq.send();
+}
+
+function tune() {
+	var tReq = new XMLHttpRequest();
+	tReq.addEventListener("load", tuneListener);
+	tReq.open("GET", base_url + "/t");
+	tReq.send();
 }
 
 document.onkeyup = function(e) {
@@ -133,10 +174,32 @@ oReq.send();
 <tr>
 	<td>Report</td><td><input type="text" name="report" id="report" value="5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
 </tr>
-
+<tr><td>
+<div id="swrColor"></div>
+</td>
+<td>
+<div id="swrInfo"></div>
+</td>
+<td>
+<input type="button" value="Tune" onClick="javascript:tune()">
+</td>
+<tr>
+<td>CW Speed</td>
+<td><input type="text" name="speed" id="speed" value="TBD"></td>
+<td><input type="button" value="Set" onClick="javascript:CWSpeed()"></td>
+</tr>
+</tr>
 </table>
 <br />
 <input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()">
+<br />
+<br />
+<input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
+<br />
+<br />
+<input type="button" value="Toggle CWR" onClick="javascript:toggleCWR()">
+<br />
+<br />
 
 </body>
 </html>
