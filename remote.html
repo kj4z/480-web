@@ -93,6 +93,12 @@ function sendReport() {
 	rReq.send();
 }
 
+function cancelCW() {
+        var rReq = new XMLHttpRequest();
+        rReq.open("GET", base_url + "/k?s=");
+        rReq.send();
+}
+
 function toggleVFO() {
 	var rReq = new XMLHttpRequest();
 	rReq.addEventListener("load", toggleListener);
@@ -132,6 +138,8 @@ document.onkeyup = function(e) {
 		sendCall();
 	} else if (e.keyCode == 82) {
 		sendReport();
+	} else if (e.keyCode == 27) {
+                cancelCW();
 	}
 }
 
