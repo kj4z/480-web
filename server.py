@@ -23,6 +23,7 @@ ser = serial.Serial(
 
 ser.isOpen()
 
+
 class BandUp(tornado.web.RequestHandler):
     def get(self):
 	global ser
@@ -142,18 +143,42 @@ class ToggleHandler(tornado.web.RequestHandler):
 	global vfo
 	global ser
 	self.set_header('Access-Control-Allow-Origin', '*')
+	a = "FW" + self.get_query_argument('a').zfill(4) + ";"
+	b = "FW" + self.get_query_argument('b').zfill(4) + ";"
 	if (vfo == 0):
 		self.write("TXB")
+		ser.write(b) # set filter bandwidth to Bfilter
 		ser.write('FR0;')
 		ser.write('FT1;')
-		ser.write('FW0200;') # set filter bandwidth to 200 Hz
+		ser.write(a) # set filter bandwidth to Afilter
 		vfo = 1
 	else:
 		self.write("TXA")
+		ser.write(a) # set filter bandwidth to Afilter
 		ser.write('FR1;')
 		ser.write('FT0;')
-		ser.write('FW2000;') # set filter bandwidth to 2 kHz
+		ser.write(b) # set filter bandwidth to Bfilter
 		vfo = 0
+
+class SetCW(tornado.web.RequestHandler):
+    def get(self):
+	global vfo
+        global ser
+	self.set_header('Access-Control-Allow-Origin', '*')
+	if (vfo == 0):
+            ser.write('MD7;')
+            ser.write('FR1;')
+	    ser.write('FT0;')
+            ser.write('MD3;')
+            ser.write('FR0;')
+	    ser.write('FT1;')
+	else:
+            ser.write('MD3;')
+            ser.write('FR0;')
+	    ser.write('FT1;')
+            ser.write('MD7;')
+            ser.write('FR1;')
+	    ser.write('FT0;')
 
 class ToggleCWR(tornado.web.RequestHandler):
     def get(self):
@@ -225,6 +250,7 @@ def make_app():
 	(r"/bu", BandUp),
 	(r"/bd", BandDown),
 	(r"/vv", CloneVFO),
+	(r"/cw", SetCW),
     ])
 
 if __name__ == "__main__":

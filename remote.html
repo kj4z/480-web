@@ -27,16 +27,31 @@ function bandDown() {
 	rReq.send();
 }
 
-function cloneVFO() {
-	var rReq = new XMLHttpRequest();
-	rReq.open("GET", base_url + "/vv");
-	rReq.send();
+function AtoB() {
+	var fReq = new XMLHttpRequest();
+	paddedFreq = pad(freqa,11);
+	fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
+	fReq.send();
+}
+
+function BtoA() {
+	var fReq = new XMLHttpRequest();
+	paddedFreq = pad(freqb,11);
+	fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+	fReq.send();
 }
 
 function ready() {
 	document.getElementById("scrollDivA").addEventListener("mousewheel", MouseWheelHandlerA, false);
 	document.getElementById("scrollDivB").addEventListener("mousewheel", MouseWheelHandlerB, false);
 }
+
+function setCW() {
+        var rReq = new XMLHttpRequest();
+        rReq.open("GET", base_url + "/cw");
+        rReq.send();
+}
+
 
 function freqListener () {
 	vfos = this.responseText.split(';');
@@ -163,7 +178,7 @@ function cancelCW() {
 function toggleVFO() {
 	var rReq = new XMLHttpRequest();
 	rReq.addEventListener("load", toggleListener);
-	rReq.open("GET", base_url + "/v");
+	rReq.open("GET", base_url + "/v?a=" + document.getElementById('Afilter').value + "&b=" + document.getElementById('Bfilter').value);
 	rReq.send();
 }
 
@@ -180,6 +195,10 @@ function toggleCWR() {
 }
 
 function tune() {
+	if (tx_vfo == 0) {
+		alert('Check your VFO, dumbass!');
+		return;
+	}
 	var tReq = new XMLHttpRequest();
 	tReq.addEventListener("load", tuneListener);
 	tReq.open("GET", base_url + "/t");
@@ -219,38 +238,46 @@ oReq.send();
 </script>
 </head>
 
-<body onload="ready()">
-
-<table border="0">
+<body onload="ready(); toggleVFO(); setCW();">
 <input type="button" value="Power On" onClick="javascript:powerOn(); javascript:refresh();">
+<input type="button" value="Power Off" onClick="javascript:powerOff();">
+<input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
+<table border="1">
 <br><br>
-<input type="button" value="RX Band Up" onClick="javascript:bandUp(); javascript:refresh();">
-<br><br>
-<input type="button" value="RX Band Down" onClick="javascript:bandDown(); javascript:refresh();">
-<br><br>
-	<tr>
-		<td>
-			VFO A:
-		</td>
-		<td>
-			<div id="scrollDivA"></div>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			VFO B:
-		</td>
-		<td>
-			<div id="scrollDivB"></div>
-		</td>
-	</tr>
+<td><b>TS-480</b></td><td>Input</td><td>Action</td><td>Status</td><td>Action</td>
+</tr>
+<tr>
+<td>A Filter BW<br>B Filter BW</td>
+<td><input type="text" name="Afilter" id="Afilter" value="200">
+<br>
+<input type="text" name="Bfilter" id="Bfilter" value="2000">
+</td>
+<td><input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()"></td>
+<td><div id="vfoInfo"></div></td>
+<td><input type="button" value="Toggle CWR" onClick="javascript:toggleCWR()"></td>
+</tr>
+<tr>
+<td>VFO A</td>
+<td><input type="text" name="setVFOA" id="setVFOA" value="TBD"></td>
+<td><input type="button" value="Set ->" onClick="javascript:SetVFOA(); javascript:refresh();"></td>
+<td> <div id="scrollDivA"></div> </td>
+<td><input type="button" value="FreqAtoB V" onClick="javascript:AtoB(); javascript:refresh();"></td>
+</tr>
+<tr>
+<td>VFO B</td>
+<td><input type="text" name="setVFOB" id="setVFOB" value="TBD"></td>
+<td><input type="button" value="Set ->" onClick="javascript:SetVFOB(); javascript:refresh();"></td>
+<td> <div id="scrollDivB"></div> </td>
+<td><input type="button" value="FreqBtoA ^" onClick="javascript:BtoA(); javascript:refresh();"></td>
+<tr>
+<td> <div id="swrColor"></div> </td>
+<td>Tune & read SWR -></td>
+<td> <input type="button" value="Tune" onClick="javascript:tune()"> </td>
+<td> <div id="swrInfo"></div> </td>
+<tr>
 </table>
 <br>
-<input type="button" value="Clone VFO A -> VFO B" onClick="javascript:cloneVFO(); javascript:refresh();">
 <br>
-<br />
-<div id="vfoInfo"></div>
-<br />
 
 <table border="1">
 <tr>
@@ -259,42 +286,13 @@ oReq.send();
 <tr>
 	<td>Report</td><td><input type="text" name="report" id="report" value="R 5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
 </tr>
-<tr><td>
-<div id="swrColor"></div>
-</td>
-<td>
-<div id="swrInfo"></div>
-</td>
-<td>
-<input type="button" value="Tune" onClick="javascript:tune()">
-</td>
-<tr>
 <td>CW Speed</td>
 <td><input type="text" name="speed" id="speed" value="TBD"></td>
 <td><input type="button" value="Set" onClick="javascript:CWSpeed()"></td>
 </tr>
-<tr>
-<td>Set VFO A Freq</td>
-<td><input type="text" name="setVFOA" id="setVFOA" value="TBD"></td>
-<td><input type="button" value="Set" onClick="javascript:SetVFOA(); javascript:refresh();"></td>
-</tr>
-<tr>
-<td>Set VFO B Freq</td>
-<td><input type="text" name="setVFOB" id="setVFOB" value="TBD"></td>
-<td><input type="button" value="Set" onClick="javascript:SetVFOB(); javascript:refresh();"></td>
-</tr>
-</tr>
 </table>
 <br />
-<input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()">
 <br />
-<br />
-<input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
-<br />
-<br />
-<input type="button" value="Toggle CWR" onClick="javascript:toggleCWR()">
-<br />
-<br />
-
+CW bandwidth options: 50 80 100 150 200 300 400 500 600 1000 2000
 </body>
 </html>
