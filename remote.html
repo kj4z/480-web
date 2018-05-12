@@ -6,15 +6,42 @@ var freq = 0;
 var tx_vfo = 0;
 var base_url = "http://my.web.server:7388";
 
+
+function powerOn() {
+	var rReq = new XMLHttpRequest();
+	rReq.addEventListener("load", toggleListener);
+	rReq.open("GET", base_url + "/ps1");
+	rReq.send();
+}
+
+function bandUp() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/bu");
+	rReq.send();
+}
+
+function bandDown() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/bd");
+	rReq.send();
+}
+
+function cloneVFO() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/vv");
+	rReq.send();
+}
+
 function ready() {
-	document.getElementById("scrollDiv").addEventListener("mousewheel", MouseWheelHandler, false);
+	document.getElementById("scrollDivA").addEventListener("mousewheel", MouseWheelHandlerA, false);
+	document.getElementById("scrollDivB").addEventListener("mousewheel", MouseWheelHandlerB, false);
 }
 
 function freqListener () {
 	vfos = this.responseText.split(';');
 	freq = parseInt(vfos[1]);
-	document.getElementById("freqDiv").innerHTML = numberWithSpaces(parseInt(vfos[0]));
-	document.getElementById("scrollDiv").innerHTML = numberWithSpaces(freq);
+	document.getElementById("scrollDivA").innerHTML = numberWithSpaces(parseInt(vfos[0]));
+	document.getElementById("scrollDivB").innerHTML = numberWithSpaces(freq);
 }
 
 function toggleListener () {
@@ -37,15 +64,29 @@ function tuneListener () {
         document.getElementById("swrInfo").innerHTML = swr + ':1';
 }
 
-function MouseWheelHandler(evt) {
+function MouseWheelHandlerA(evt) {
 	//console.log(evt.deltaY);
 	freq += evt.deltaY;
 	freq = parseInt(freq);
-	document.getElementById("scrollDiv").innerHTML = numberWithSpaces(freq);
+	document.getElementById("scrollDivA").innerHTML = numberWithSpaces(freq);
 
 	paddedFreq = pad(freq,11);
 	var fReq = new XMLHttpRequest();
-	fReq.open("GET", base_url + "/s?f=" + paddedFreq);
+	fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+	fReq.send();
+
+}
+
+
+function MouseWheelHandlerB(evt) {
+	//console.log(evt.deltaY);
+	freq += evt.deltaY;
+	freq = parseInt(freq);
+	document.getElementById("scrollDivB").innerHTML = numberWithSpaces(freq);
+
+	paddedFreq = pad(freq,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
 	fReq.send();
 
 }
@@ -71,6 +112,24 @@ function CWSpeed() {
 	var rReq = new XMLHttpRequest();
 	rReq.open("GET", base_url + "/c?s=" + cwspeed);
 	rReq.send();
+}
+
+function SetVFOA() {
+        VFOAString = document.getElementById('setVFOA').value
+        vfoa = parseInt(VFOAString);
+	paddedFreq = pad(vfoa,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+	fReq.send();
+}
+
+function SetVFOB() {
+        VFOBString = document.getElementById('setVFOB').value
+        vfob = parseInt(VFOBString);
+	paddedFreq = pad(vfob,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
+	fReq.send();
 }
 
 function sendCall() {
@@ -125,6 +184,13 @@ function tune() {
 	tReq.send();
 }
 
+function refresh() {
+	var oReq = new XMLHttpRequest();
+	oReq.addEventListener("load", freqListener);
+	oReq.open("GET", base_url + "/f");
+	oReq.send();
+}
+
 document.onkeyup = function(e) {
 	if (document.activeElement == document.getElementById('call')) {
 		return; //don't capture key presses when we're editing the text fields
@@ -154,12 +220,18 @@ oReq.send();
 <body onload="ready()">
 
 <table border="0">
+<input type="button" value="Power On" onClick="javascript:powerOn(); javascript:refresh();">
+<br><br>
+<input type="button" value="RX Band Up" onClick="javascript:bandUp(); javascript:refresh();">
+<br><br>
+<input type="button" value="RX Band Down" onClick="javascript:bandDown(); javascript:refresh();">
+<br><br>
 	<tr>
 		<td>
 			VFO A:
 		</td>
 		<td>
-			<div id="freqDiv"></div>
+			<div id="scrollDivA"></div>
 		</td>
 	</tr>
 	<tr>
@@ -167,20 +239,23 @@ oReq.send();
 			VFO B:
 		</td>
 		<td>
-			<div id="scrollDiv"></div>
+			<div id="scrollDivB"></div>
 		</td>
 	</tr>
 </table>
+<br>
+<input type="button" value="Clone VFO A -> VFO B" onClick="javascript:cloneVFO(); javascript:refresh();">
+<br>
 <br />
 <div id="vfoInfo"></div>
 <br />
 
 <table border="1">
 <tr>
-	<td>Call</td><td><input type="text" name="call" id="call" value="KJ4Z"></td><td><input type="button" value="Send" onClick="javascript:sendCall()"></td>
+	<td>Call</td><td><input type="text" name="call" id="call" value="WW4N"></td><td><input type="button" value="Send" onClick="javascript:sendCall()"></td>
 </tr>
 <tr>
-	<td>Report</td><td><input type="text" name="report" id="report" value="5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
+	<td>Report</td><td><input type="text" name="report" id="report" value="R 5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
 </tr>
 <tr><td>
 <div id="swrColor"></div>
@@ -195,6 +270,16 @@ oReq.send();
 <td>CW Speed</td>
 <td><input type="text" name="speed" id="speed" value="TBD"></td>
 <td><input type="button" value="Set" onClick="javascript:CWSpeed()"></td>
+</tr>
+<tr>
+<td>Set VFO A Freq</td>
+<td><input type="text" name="setVFOA" id="setVFOA" value="TBD"></td>
+<td><input type="button" value="Set" onClick="javascript:SetVFOA(); javascript:refresh();"></td>
+</tr>
+<tr>
+<td>Set VFO B Freq</td>
+<td><input type="text" name="setVFOB" id="setVFOB" value="TBD"></td>
+<td><input type="button" value="Set" onClick="javascript:SetVFOB(); javascript:refresh();"></td>
 </tr>
 </tr>
 </table>

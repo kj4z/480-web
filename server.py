@@ -16,12 +16,30 @@ vfo = 0
 
 # configure the serial connections (the parameters differs on the device you are connecting to)
 ser = serial.Serial(
-    port='COM2',
-    #port='/dev/ttyUSB0',
+    #port='COM2',
+    port='/dev/ttyUSB0',
     baudrate=9600
 )
 
 ser.isOpen()
+
+class BandUp(tornado.web.RequestHandler):
+    def get(self):
+	global ser
+	ser.write('BU;')
+	self.set_header('Access-Control-Allow-Origin', '*')
+
+class BandDown(tornado.web.RequestHandler):
+    def get(self):
+	global ser
+	ser.write('BD;')
+	self.set_header('Access-Control-Allow-Origin', '*')
+
+class CloneVFO(tornado.web.RequestHandler):
+    def get(self):
+	global ser
+	ser.write('VV;')
+	self.set_header('Access-Control-Allow-Origin', '*')
 
 class UpHandler(tornado.web.RequestHandler):
     def get(self):
@@ -38,7 +56,22 @@ class DownHandler(tornado.web.RequestHandler):
 class SetFreqHandler(tornado.web.RequestHandler):
     def get(self):
 	global ser
-	cmd = 'FB' + self.get_query_argument('f') +';'
+	freqa = ''
+	freqb = ''
+	try:
+		freqa = self.get_query_argument('fa')
+	except tornado.web.MissingArgumentError:
+		pass
+	try:
+		freqb = self.get_query_argument('fb')
+	except tornado.web.MissingArgumentError:
+		pass
+	if freqa:
+		cmd = 'FA' + freqa +';'
+	elif freqb:
+		cmd = 'FB' + freqb +';'
+	else:
+		return
 	cmd = str(cmd)
 	self.set_header('Access-Control-Allow-Origin', '*')
         self.write("SET" + cmd)
@@ -69,9 +102,22 @@ class SendCWHandler(tornado.web.RequestHandler):
 	ser.write(cmd)
 	print cmd
 
+class PowerOn(tornado.web.RequestHandler):
+    def get(self):
+	global ser
+	# set power status on, spam it to wake up
+	ser.write(';;;;PS1;')
+	ser.write(';;;;PS1;')
+	time.sleep(1)
+	ser.write(';;;;PS1;')
+	self.set_header('Access-Control-Allow-Origin', '*')
+	time.sleep(1)
+	time.sleep(1)
+
 class FreqHandler(tornado.web.RequestHandler):
     def get(self):
 	global ser
+
 	ser.write('FA;FB;')
 	time.sleep(1)
 	freq = ''
@@ -175,6 +221,10 @@ def make_app():
 	(r"/x", ToggleVox),
 	(r"/t", Tune),
 	(r"/r", ToggleCWR),
+	(r"/ps1", PowerOn),
+	(r"/bu", BandUp),
+	(r"/bd", BandDown),
+	(r"/vv", CloneVFO),
     ])
 
 if __name__ == "__main__":
