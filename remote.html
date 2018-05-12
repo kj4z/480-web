@@ -15,6 +15,13 @@ function powerOn() {
 	rReq.send();
 }
 
+function powerOff() {
+	var rReq = new XMLHttpRequest();
+	rReq.addEventListener("load", toggleListener);
+	rReq.open("GET", base_url + "/ps0");
+	rReq.send();
+}
+
 function bandUp() {
 	var rReq = new XMLHttpRequest();
 	rReq.open("GET", base_url + "/bu");
