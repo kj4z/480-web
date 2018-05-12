@@ -78,6 +78,14 @@ function toggleListener () {
 	}
 }
 
+function toggleVoxListener () {
+	if (this.responseText == '1') {
+		document.getElementById("voxInfo").innerHTML = "<font color='green'>On</font>";
+	} else {
+		document.getElementById("voxInfo").innerHTML = "<font color='blue'>Off</font>";
+	}
+}
+
 function tuneListener () {
         swr = this.responseText
         if (swr[0] == '1') {
@@ -191,6 +199,7 @@ function toggleVFO() {
 
 function toggleVox() {
 	var rReq = new XMLHttpRequest();
+	rReq.addEventListener("load", toggleVoxListener);
 	rReq.open("GET", base_url + "/x");
 	rReq.send();
 }
@@ -248,7 +257,6 @@ oReq.send();
 <body onload="ready(); toggleVFO(); setCW();">
 <input type="button" value="Power On" onClick="javascript:powerOn(); javascript:refresh();">
 <input type="button" value="Power Off" onClick="javascript:powerOff();">
-<input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
 <table border="1">
 <br><br>
 <td><b>TS-480</b></td><td>Input</td><td>Action</td><td>Status</td><td>Action</td>
@@ -289,6 +297,8 @@ oReq.send();
 <table border="1">
 <tr>
 	<td>Call</td><td><input type="text" name="call" id="call" value="WW4N"></td><td><input type="button" value="Send" onClick="javascript:sendCall()"></td>
+<td>Vox ? <div id="voxInfo"></div></td>
+<td><input type="button" value="Toggle Vox" onClick="javascript:toggleVox()"></td>
 </tr>
 <tr>
 	<td>Report</td><td><input type="text" name="report" id="report" value="R 5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
