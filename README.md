@@ -7,6 +7,11 @@ When remote.html loads, it will set the transciever to the following:
  - VFO B - CW with 2000Hz DSP filter
  - split mode operation
 
+### Power On
+### Power Off
+### Set Simplex USB
+ - sets VFO A to RX and TX (simplex) and USB Mode
+ - mainly useful to set the rig for digi mode use by other software
 
 ### ToggleVFO
  - switches the RX and TX functions of VFO A and B
@@ -34,3 +39,6 @@ When remote.html loads, it will set the transciever to the following:
 
 ### CW Speed
  - Set CW speed from the input box
+
+### Audio Gain
+ - Set the Audio Gain (0 - 255)
