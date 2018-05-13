@@ -59,6 +59,11 @@ function setCW() {
         rReq.send();
 }
 
+function setSimplexUSB() {
+        var rReq = new XMLHttpRequest();
+        rReq.open("GET", base_url + "/usb");
+        rReq.send();
+}
 
 function freqListener () {
 	vfos = this.responseText.split(';');
@@ -257,6 +262,7 @@ oReq.send();
 <body onload="ready(); toggleVFO(); setCW();">
 <input type="button" value="Power On" onClick="javascript:powerOn(); javascript:refresh();">
 <input type="button" value="Power Off" onClick="javascript:powerOff();">
+<input type="button" value="Set Simplex USB" onClick="javascript:setSimplexUSB();">
 <table border="1">
 <br><br>
 <td><b>TS-480</b></td><td>Input</td><td>Action</td><td>Status</td><td>Action</td>

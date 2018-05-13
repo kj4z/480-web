@@ -24,6 +24,15 @@ ser = serial.Serial(
 ser.isOpen()
 
 
+class SetSimplexUSB(tornado.web.RequestHandler):
+    def get(self):
+        global vfo
+        global ser
+        self.set_header('Access-Control-Allow-Origin', '*')
+        ser.write('MD2;')
+        ser.write('FR0;')
+        ser.write('FT0;')
+
 class BandUp(tornado.web.RequestHandler):
     def get(self):
         global ser
@@ -258,6 +267,7 @@ def make_app():
         (r"/bd", BandDown),
         (r"/vv", CloneVFO),
         (r"/cw", SetCW),
+        (r"/usb", SetSimplexUSB),
     ])
 
 if __name__ == "__main__":
