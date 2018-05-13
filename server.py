@@ -152,6 +152,13 @@ class FreqHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Origin', '*')
         self.write(freq_a + ';' + freq_b)
 
+class SetAudioGain(tornado.web.RequestHandler):
+    def get(self):
+        global ser
+        self.set_header('Access-Control-Allow-Origin', '*')
+        cmd = "AG0" + self.get_query_argument('g').zfill(3) + ";"
+        ser.write(cmd)
+
 class ToggleHandler(tornado.web.RequestHandler):
     def get(self):
         global vfo
@@ -268,6 +275,7 @@ def make_app():
         (r"/vv", CloneVFO),
         (r"/cw", SetCW),
         (r"/usb", SetSimplexUSB),
+        (r"/ag", SetAudioGain),
     ])
 
 if __name__ == "__main__":
