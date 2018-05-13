@@ -1,6 +1,8 @@
 # 480-web
 A web interface for the Kenwood TS-480
 
+![480-web](images/480-web.png)
+
 ### Startup
 When remote.html loads, it will set the transciever to the following:
  - VFO A - CWR with 200Hz DSP filter
