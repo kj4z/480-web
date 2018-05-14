@@ -2,19 +2,75 @@
 <html><head>
 <script>
 
-var freq = 0;
+var freqa = 0;
+var freqb = 0;
 var tx_vfo = 0;
 var base_url = "http://my.web.server:7388";
 
+
+function powerOn() {
+	var rReq = new XMLHttpRequest();
+	rReq.addEventListener("load", toggleListener);
+	rReq.open("GET", base_url + "/ps1");
+	rReq.send();
+}
+
+function powerOff() {
+	var rReq = new XMLHttpRequest();
+	rReq.addEventListener("load", toggleListener);
+	rReq.open("GET", base_url + "/ps0");
+	rReq.send();
+}
+
+function bandUp() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/bu");
+	rReq.send();
+}
+
+function bandDown() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/bd");
+	rReq.send();
+}
+
+function AtoB() {
+	var fReq = new XMLHttpRequest();
+	paddedFreq = pad(freqa,11);
+	fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
+	fReq.send();
+}
+
+function BtoA() {
+	var fReq = new XMLHttpRequest();
+	paddedFreq = pad(freqb,11);
+	fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+	fReq.send();
+}
+
 function ready() {
-	document.getElementById("scrollDiv").addEventListener("mousewheel", MouseWheelHandler, false);
+	document.getElementById("scrollDivA").addEventListener("mousewheel", MouseWheelHandlerA, false);
+	document.getElementById("scrollDivB").addEventListener("mousewheel", MouseWheelHandlerB, false);
+}
+
+function setCW() {
+        var rReq = new XMLHttpRequest();
+        rReq.open("GET", base_url + "/cw");
+        rReq.send();
+}
+
+function setSimplexUSB() {
+        var rReq = new XMLHttpRequest();
+        rReq.open("GET", base_url + "/usb");
+        rReq.send();
 }
 
 function freqListener () {
 	vfos = this.responseText.split(';');
-	freq = parseInt(vfos[1]);
-	document.getElementById("freqDiv").innerHTML = numberWithSpaces(parseInt(vfos[0]));
-	document.getElementById("scrollDiv").innerHTML = numberWithSpaces(freq);
+	freqa = parseInt(vfos[0]);
+	freqb = parseInt(vfos[1]);
+	document.getElementById("scrollDivA").innerHTML = numberWithSpaces(freqa);
+	document.getElementById("scrollDivB").innerHTML = numberWithSpaces(freqb);
 }
 
 function toggleListener () {
@@ -24,6 +80,14 @@ function toggleListener () {
 	} else {
 		tx_vfo = 1;
 		document.getElementById("vfoInfo").innerHTML = "<font color='green'>VFO A = RX<br />VFO B = TX</font>";
+	}
+}
+
+function toggleVoxListener () {
+	if (this.responseText == '1') {
+		document.getElementById("voxInfo").innerHTML = "<font color='green'>On</font>";
+	} else {
+		document.getElementById("voxInfo").innerHTML = "<font color='blue'>Off</font>";
 	}
 }
 
@@ -37,17 +101,54 @@ function tuneListener () {
         document.getElementById("swrInfo").innerHTML = swr + ':1';
 }
 
-function MouseWheelHandler(evt) {
-	//console.log(evt.deltaY);
-	freq += evt.deltaY;
-	freq = parseInt(freq);
-	document.getElementById("scrollDiv").innerHTML = numberWithSpaces(freq);
-
-	paddedFreq = pad(freq,11);
+function FineTune (vfo,direction) {
 	var fReq = new XMLHttpRequest();
-	fReq.open("GET", base_url + "/s?f=" + paddedFreq);
+        if (vfo == 'a') {
+            if (direction == 'up') {
+                freqa += 100
+            }
+            else {
+                freqa -= 100
+            }
+	    document.getElementById("scrollDivA").innerHTML = numberWithSpaces(freqa);
+	    paddedFreq = pad(freqa,11);
+	    fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+        }
+        if (vfo == 'b') {
+            if (direction == 'up') {
+                freqb += 100
+            }
+            else {
+                freqb -= 100
+            }
+	    document.getElementById("scrollDivB").innerHTML = numberWithSpaces(freqb);
+	    paddedFreq = pad(freqb,11);
+	    fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
+        }
 	fReq.send();
+}
 
+function MouseWheelHandlerA(evt) {
+	//console.log(evt.deltaY);
+	freqa += evt.deltaY;
+	freqa = parseInt(freqa);
+	document.getElementById("scrollDivA").innerHTML = numberWithSpaces(freqa);
+	paddedFreq = pad(freqa,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+	fReq.send();
+}
+
+
+function MouseWheelHandlerB(evt) {
+	//console.log(evt.deltaY);
+	freqb += evt.deltaY;
+	freqb = parseInt(freqb);
+	document.getElementById("scrollDivB").innerHTML = numberWithSpaces(freqb);
+	paddedFreq = pad(freqb,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
+	fReq.send();
 }
 
 function pad(num, size) {
@@ -71,6 +172,24 @@ function CWSpeed() {
 	var rReq = new XMLHttpRequest();
 	rReq.open("GET", base_url + "/c?s=" + cwspeed);
 	rReq.send();
+}
+
+function SetVFOA() {
+        VFOAString = document.getElementById('setVFOA').value
+        vfoa = parseInt(VFOAString);
+	paddedFreq = pad(vfoa,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+	fReq.send();
+}
+
+function SetVFOB() {
+        VFOBString = document.getElementById('setVFOB').value
+        vfob = parseInt(VFOBString);
+	paddedFreq = pad(vfob,11);
+	var fReq = new XMLHttpRequest();
+	fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
+	fReq.send();
 }
 
 function sendCall() {
@@ -102,12 +221,19 @@ function cancelCW() {
 function toggleVFO() {
 	var rReq = new XMLHttpRequest();
 	rReq.addEventListener("load", toggleListener);
-	rReq.open("GET", base_url + "/v");
+	rReq.open("GET", base_url + "/v?a=" + document.getElementById('Afilter').value + "&b=" + document.getElementById('Bfilter').value);
+	rReq.send();
+}
+
+function setAudioGain() {
+	var rReq = new XMLHttpRequest();
+	rReq.open("GET", base_url + "/ag?g=" + document.getElementById('AudioGain').value);
 	rReq.send();
 }
 
 function toggleVox() {
 	var rReq = new XMLHttpRequest();
+	rReq.addEventListener("load", toggleVoxListener);
 	rReq.open("GET", base_url + "/x");
 	rReq.send();
 }
@@ -119,10 +245,21 @@ function toggleCWR() {
 }
 
 function tune() {
+	if (tx_vfo == 0) {
+		alert('Check your VFO, dumbass!');
+		return;
+	}
 	var tReq = new XMLHttpRequest();
 	tReq.addEventListener("load", tuneListener);
 	tReq.open("GET", base_url + "/t");
 	tReq.send();
+}
+
+function refresh() {
+	var oReq = new XMLHttpRequest();
+	oReq.addEventListener("load", freqListener);
+	oReq.open("GET", base_url + "/f");
+	oReq.send();
 }
 
 document.onkeyup = function(e) {
@@ -151,63 +288,74 @@ oReq.send();
 </script>
 </head>
 
-<body onload="ready()">
-
-<table border="0">
-	<tr>
-		<td>
-			VFO A:
-		</td>
-		<td>
-			<div id="freqDiv"></div>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			VFO B:
-		</td>
-		<td>
-			<div id="scrollDiv"></div>
-		</td>
-	</tr>
+<body onload="ready(); toggleVFO(); setCW();">
+<input type="button" value="Power On" onClick="javascript:powerOn(); javascript:refresh();">
+<input type="button" value="Power Off" onClick="javascript:powerOff();">
+<input type="button" value="Set Simplex USB" onClick="javascript:setSimplexUSB();">
+<table border="1">
+<br><br>
+<td><b>TS-480</b></td><td>Input</td><td>Action</td><td>Status</td><td>Action</td>
+</tr>
+<tr>
+<td>A Filter BW<br>B Filter BW</td>
+<td><input type="text" name="Afilter" id="Afilter" value="200">
+<br>
+<input type="text" name="Bfilter" id="Bfilter" value="2000">
+</td>
+<td><input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()"></td>
+<td><div id="vfoInfo"></div></td>
+<td><input type="button" value="Toggle CWR" onClick="javascript:toggleCWR()"></td>
+</tr>
+<tr>
+<td>VFO A</td>
+<td><input type="text" name="setVFOA" id="setVFOA" value="TBD"></td>
+<td><input type="button" value="Set ->" onClick="javascript:SetVFOA(); javascript:refresh();"></td>
+<td> <div id="scrollDivA"></div> </td>
+<td><input type="button" value="   UP   " onClick="javascript:FineTune(vfo='a',direction='up')">
+<br>
+<input type="button" value="DOWN" onClick="javascript:FineTune(vfo='a',direction='down')">
+<input type="button" value="FreqAtoB V" onClick="javascript:AtoB(); javascript:refresh();"></td>
+</tr>
+<tr>
+<td>VFO B</td>
+<td><input type="text" name="setVFOB" id="setVFOB" value="TBD"></td>
+<td><input type="button" value="Set ->" onClick="javascript:SetVFOB(); javascript:refresh();"></td>
+<td> <div id="scrollDivB"></div> </td>
+<td><input type="button" value="   UP   " onClick="javascript:FineTune(vfo='b',direction='up')">
+<br>
+<input type="button" value="DOWN" onClick="javascript:FineTune(vfo='b',direction='down')">
+<input type="button" value="FreqBtoA ^" onClick="javascript:BtoA(); javascript:refresh();"></td>
+<tr>
+<td> <div id="swrColor"></div> </td>
+<td>Tune and read SWR -></td>
+<td> <input type="button" value="Tune" onClick="javascript:tune()"> </td>
+<td> <div id="swrInfo"></div> </td>
+<tr>
 </table>
-<br />
-<div id="vfoInfo"></div>
-<br />
+<br>
 
 <table border="1">
 <tr>
-	<td>Call</td><td><input type="text" name="call" id="call" value="KJ4Z"></td><td><input type="button" value="Send" onClick="javascript:sendCall()"></td>
+	<td>Call</td><td><input type="text" name="call" id="call" value="WW4N"></td><td><input type="button" value="Send" onClick="javascript:sendCall()"></td>
+<td>Vox Status</td>
+<td><input type="button" value="Toggle Vox" onClick="javascript:toggleVox()"></td>
 </tr>
 <tr>
-	<td>Report</td><td><input type="text" name="report" id="report" value="5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
+	<td>Report</td><td><input type="text" name="report" id="report" value="R 5NN TU"></td><td><input type="button" value="Send" onClick="javascript:sendReport()"></td>
+<td> <div id="voxInfo"></div></td> </td>
 </tr>
-<tr><td>
-<div id="swrColor"></div>
-</td>
-<td>
-<div id="swrInfo"></div>
-</td>
-<td>
-<input type="button" value="Tune" onClick="javascript:tune()">
-</td>
-<tr>
 <td>CW Speed</td>
 <td><input type="text" name="speed" id="speed" value="TBD"></td>
 <td><input type="button" value="Set" onClick="javascript:CWSpeed()"></td>
 </tr>
-</tr>
+<tr>
+<td>Audio Gain</td>
+<td><input type="text" name="AudioGain" id="AudioGain" value="150">
+<td><input type="button" value="Set Audio Gain" onClick="javascript:setAudioGain()"></td>
 </table>
 <br />
-<input type="button" value="Toggle VFO" onClick="javascript:toggleVFO()">
-<br />
-<br />
-<input type="button" value="Toggle Vox" onClick="javascript:toggleVox()">
-<br />
-<br />
-<input type="button" value="Toggle CWR" onClick="javascript:toggleCWR()">
-<br />
-<br />
-
+CW bandwidth options: 50 80 100 150 200 300 400 500 600 1000 2000
+<br>
+Audio Gain (0-255)
 </body>
 </html>
