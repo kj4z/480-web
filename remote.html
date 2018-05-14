@@ -101,17 +101,42 @@ function tuneListener () {
         document.getElementById("swrInfo").innerHTML = swr + ':1';
 }
 
+function FineTune (vfo,direction) {
+	var fReq = new XMLHttpRequest();
+        if (vfo == 'a') {
+            if (direction == 'up') {
+                freqa += 100
+            }
+            else {
+                freqa -= 100
+            }
+	    document.getElementById("scrollDivA").innerHTML = numberWithSpaces(freqa);
+	    paddedFreq = pad(freqa,11);
+	    fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
+        }
+        if (vfo == 'b') {
+            if (direction == 'up') {
+                freqb += 100
+            }
+            else {
+                freqb -= 100
+            }
+	    document.getElementById("scrollDivB").innerHTML = numberWithSpaces(freqb);
+	    paddedFreq = pad(freqb,11);
+	    fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
+        }
+	fReq.send();
+}
+
 function MouseWheelHandlerA(evt) {
 	//console.log(evt.deltaY);
 	freqa += evt.deltaY;
 	freqa = parseInt(freqa);
 	document.getElementById("scrollDivA").innerHTML = numberWithSpaces(freqa);
-
 	paddedFreq = pad(freqa,11);
 	var fReq = new XMLHttpRequest();
 	fReq.open("GET", base_url + "/s?fa=" + paddedFreq);
 	fReq.send();
-
 }
 
 
@@ -120,12 +145,10 @@ function MouseWheelHandlerB(evt) {
 	freqb += evt.deltaY;
 	freqb = parseInt(freqb);
 	document.getElementById("scrollDivB").innerHTML = numberWithSpaces(freqb);
-
 	paddedFreq = pad(freqb,11);
 	var fReq = new XMLHttpRequest();
 	fReq.open("GET", base_url + "/s?fb=" + paddedFreq);
 	fReq.send();
-
 }
 
 function pad(num, size) {
@@ -288,17 +311,23 @@ oReq.send();
 <td><input type="text" name="setVFOA" id="setVFOA" value="TBD"></td>
 <td><input type="button" value="Set ->" onClick="javascript:SetVFOA(); javascript:refresh();"></td>
 <td> <div id="scrollDivA"></div> </td>
-<td><input type="button" value="FreqAtoB V" onClick="javascript:AtoB(); javascript:refresh();"></td>
+<td><input type="button" value="   UP   " onClick="javascript:FineTune(vfo='a',direction='up')">
+<br>
+<input type="button" value="DOWN" onClick="javascript:FineTune(vfo='a',direction='down')">
+<input type="button" value="FreqAtoB V" onClick="javascript:AtoB(); javascript:refresh();"></td>
 </tr>
 <tr>
 <td>VFO B</td>
 <td><input type="text" name="setVFOB" id="setVFOB" value="TBD"></td>
 <td><input type="button" value="Set ->" onClick="javascript:SetVFOB(); javascript:refresh();"></td>
 <td> <div id="scrollDivB"></div> </td>
-<td><input type="button" value="FreqBtoA ^" onClick="javascript:BtoA(); javascript:refresh();"></td>
+<td><input type="button" value="   UP   " onClick="javascript:FineTune(vfo='b',direction='up')">
+<br>
+<input type="button" value="DOWN" onClick="javascript:FineTune(vfo='b',direction='down')">
+<input type="button" value="FreqBtoA ^" onClick="javascript:BtoA(); javascript:refresh();"></td>
 <tr>
 <td> <div id="swrColor"></div> </td>
-<td>Tune & read SWR -></td>
+<td>Tune and read SWR -></td>
 <td> <input type="button" value="Tune" onClick="javascript:tune()"> </td>
 <td> <div id="swrInfo"></div> </td>
 <tr>

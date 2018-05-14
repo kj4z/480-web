@@ -25,6 +25,9 @@ When remote.html loads, it will set the transciever to the following:
 ### VFO (Set ->)
  - Set the frequency of the VFO from the input box
 
+### Fine Tuning (UP / DOWN)
+ - Increment or Decrement this VFO frequency by 100Hz
+
 ### Clone (FreqAtoB or FreqBtoA)
  - "Pushes" one VFO frequency into the other VFO
 
